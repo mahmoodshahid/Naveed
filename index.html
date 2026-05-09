@@ -248,11 +248,15 @@
 
             const encodedText = encodeURIComponent(reportText);
             
-            // Use standard wa.me format for best compatibility (923458081903)
-            const whatsappUrl = `https://wa.me/923458081903?text=${encodedText}`;
+            // Use the most compatible WhatsApp API endpoint
+            const whatsappUrl = `https://api.whatsapp.com/send?phone=923458081903&text=${encodedText}`;
             
-            // Using window.open with _top or simply window.location.href for top-level navigation
-            window.top.location.href = whatsappUrl;
+            // Try different methods for better compatibility in WebViews and mobile apps
+            if (window.top) {
+                window.top.location.href = whatsappUrl;
+            } else {
+                window.location.href = whatsappUrl;
+            }
         }
 
         init();
