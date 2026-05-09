@@ -198,7 +198,7 @@
 
         function fallbackToWhatsApp(text) {
             const encodedText = encodeURIComponent(text);
-            const whatsappUrl = `https://api.whatsapp.com/send?phone=923458081903&text=${encodedText}`;
+            const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedText}`;
             window.location.href = whatsappUrl;
         }
 
