@@ -247,8 +247,21 @@
             reportText += `_ہمیشہ نماز کی پابندی کریں_`;
 
             const encodedText = encodeURIComponent(reportText);
-            const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedText}`;
-            window.open(whatsappUrl, '_blank');
+            
+            // Use Direct WhatsApp API for better compatibility
+            let whatsappUrl = `https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${encodedText}`;
+            
+            // Deep link for mobile devices to skip "Open in WhatsApp" page if possible
+            if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+                whatsappUrl = `whatsapp://send?phone=${WHATSAPP_NUMBER}&text=${encodedText}`;
+            }
+
+            try {
+                window.location.href = whatsappUrl;
+            } catch (err) {
+                // Fallback to web link if deep link fails
+                window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodedText}`, '_blank');
+            }
         }
 
         init();
