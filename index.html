@@ -248,11 +248,12 @@
 
             const encodedText = encodeURIComponent(reportText);
             
-            // Universal Link for WhatsApp (Most stable on all devices)
-            const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedText}`;
+            // Using api.whatsapp.com which is often more compatible in WebViews
+            // Explicitly including the number 923458081903
+            const whatsappUrl = `https://api.whatsapp.com/send?phone=923458081903&text=${encodedText}`;
             
-            // Using window.open with _blank is more reliable than location.href for external apps
-            window.open(whatsappUrl, '_blank');
+            // Use window.location.href for single-page apps/WebViews to ensure the redirect is handled by the browser
+            window.location.href = whatsappUrl;
         }
 
         init();
