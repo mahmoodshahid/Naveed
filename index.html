@@ -1,13 +1,257 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Google AI Studio App</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ایم نوید چسکا پوائنٹ - روزانہ رپورٹ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&family=Lateef:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Lateef', serif;
+        }
+        .font-urdu {
+            font-family: 'Noto Nastaliq Urdu', serif;
+        }
+        input[type="number"] {
+            direction: ltr;
+            text-align: left;
+        }
+    </style>
+</head>
+<body class="min-h-screen py-8 px-4 bg-slate-50 text-slate-900">
 
+    <div class="max-w-xl mx-auto space-y-6">
+        <!-- Header Section -->
+        <header class="text-center space-y-4 pb-6 border-b border-orange-100">
+            <div class="flex justify-center">
+                <div class="bg-orange-500 p-4 rounded-2xl shadow-lg shadow-orange-200">
+                    <i class="fas fa-mug-hot text-3xl text-white"></i>
+                </div>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-bold text-orange-600 font-urdu">ایم نوید چسکا پوائنٹ</h1>
+            <p class="text-slate-500 text-xl">رینالہ خورد</p>
+            
+            <div class="flex justify-center mt-4">
+                <input type="date" id="report-date" class="px-4 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none shadow-sm text-slate-700">
+            </div>
+        </header>
+
+        <!-- Sales Card -->
+        <section class="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100">
+            <h2 class="text-2xl font-bold mb-4 flex items-center gap-2 text-slate-800">
+                <i class="fas fa-chart-line text-green-500"></i>
+                فروخت (Sales)
+            </h2>
+            <div class="space-y-4">
+                <div class="space-y-2">
+                    <label class="text-xl font-bold text-slate-700 block text-right">کل سیل (Total Sale)</label>
+                    <input type="number" id="total-sale-input" placeholder="0" class="w-full px-4 py-4 bg-slate-50 border-2 border-slate-200 rounded-2xl focus:ring-4 focus:ring-green-100 focus:border-green-500 outline-none text-2xl font-bold transition-all text-slate-800">
+                </div>
+            </div>
+            <div class="mt-6 p-4 bg-green-50 rounded-2xl flex justify-between items-center text-green-800">
+                <span class="text-xl font-bold">ٹوٹل سیل</span>
+                <span id="display-total-sale" class="text-2xl font-bold">0</span>
+            </div>
+        </section>
+
+        <!-- Expenses Card -->
+        <section class="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100">
+            <h2 class="text-2xl font-bold mb-4 flex items-center gap-2 text-slate-800">
+                <i class="fas fa-wallet text-red-500"></i>
+                اخراجات (Expenses)
+            </h2>
+            
+            <div id="expenses-list" class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+                <!-- Expenses will be injected here by JS -->
+            </div>
+
+            <div class="p-4 bg-red-50 rounded-2xl flex justify-between items-center text-red-800">
+                <span class="text-xl font-bold">ٹوٹل خرچہ</span>
+                <span id="display-total-expense" class="text-2xl font-bold">0</span>
+            </div>
+        </section>
+
+        <!-- Result Card -->
+        <section id="result-card" class="rounded-[2rem] p-6 shadow-lg border-2 transition-all bg-emerald-600 border-emerald-400 text-white">
+            <div class="flex justify-between items-center">
+                <div class="space-y-1">
+                    <p class="text-white/80 text-lg">نتیجہ (Result)</p>
+                    <h3 id="result-label" class="text-3xl font-bold font-urdu">نفع (Profit)</h3>
+                </div>
+                <div class="text-right">
+                    <span id="display-profit" class="text-4xl font-bold">0</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Action Button -->
+        <button id="whatsapp-btn" class="w-full py-5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-[2rem] shadow-xl shadow-emerald-100 flex items-center justify-center gap-3 text-2xl font-bold hover:scale-[1.02] active:scale-[0.98] transition-all">
+            <i class="fab fa-whatsapp text-3xl"></i>
+            <span class="font-urdu pt-1">واٹس ایپ پر بھیجیں</span>
+        </button>
+
+        <!-- Footer -->
+        <footer class="text-center pt-8 text-slate-400 space-y-2">
+            <p class="font-urdu text-lg italic">ہمیشہ نماز کی پابندی کریں</p>
+            <p class="text-xs uppercase tracking-widest opacity-50">M. Naveed Chaska Point Register</p>
+        </footer>
+    </div>
+
+    <script>
+        const WHATSAPP_NUMBER = '923458081903';
+        const DEFAULT_EXPENSES = [
+            { id: 'grocery', name: 'کریانہ' },
+            { id: 'mandi', name: 'منڈی' },
+            { id: 'roll', name: 'رول' },
+            { id: 'cylinder', name: 'سلنڈر' },
+            { id: 'spices', name: 'مصالحہ' },
+            { id: 'electricity', name: 'بل بجلی' },
+            { id: 'rent', name: 'کرایہ' },
+            { id: 'labor', name: 'مزدوری' },
+            { id: 'ketchup', name: 'کیچپ وغیرہ' },
+            { id: 'committee', name: 'کمیٹی' },
+            { id: 'others', name: 'دیگر' },
+        ];
+
+        let state = {
+            date: new Date().toISOString().split('T')[0],
+            sale: 0,
+            expenses: DEFAULT_EXPENSES.reduce((acc, exp) => {
+                acc[exp.id] = { checked: false, amount: 0 };
+                return acc;
+            }, {})
+        };
+
+        // DOM Elements
+        const dateInput = document.getElementById('report-date');
+        const saleInput = document.getElementById('total-sale-input');
+        const expensesContainer = document.getElementById('expenses-list');
+        const totalSaleDisplay = document.getElementById('display-total-sale');
+        const totalExpenseDisplay = document.getElementById('display-total-expense');
+        const profitDisplay = document.getElementById('display-profit');
+        const resultLabel = document.getElementById('result-label');
+        const resultCard = document.getElementById('result-card');
+        const whatsappBtn = document.getElementById('whatsapp-btn');
+
+        // Initialize
+        function init() {
+            dateInput.value = state.date;
+            renderExpenses();
+            attachListeners();
+            calculate();
+        }
+
+        function renderExpenses() {
+            expensesContainer.innerHTML = DEFAULT_EXPENSES.map(exp => `
+                <div class="expense-item flex items-center justify-between p-3 rounded-2xl border transition-all bg-white border-slate-100" id="item-container-${exp.id}">
+                    <label class="flex items-center gap-3 cursor-pointer flex-1">
+                        <input type="checkbox" id="cb-${exp.id}" class="w-6 h-6 rounded-lg accent-orange-500 cursor-pointer" onchange="toggleExpense('${exp.id}')">
+                        <span class="text-xl font-urdu leading-none pt-1">${exp.name}</span>
+                    </label>
+                    <div id="input-container-${exp.id}" class="hidden w-24">
+                        <input type="number" id="input-${exp.id}" placeholder="رقم" class="w-full px-2 py-1 bg-white border border-orange-200 rounded-lg outline-none text-sm" oninput="updateExpenseAmount('${exp.id}', this.value)">
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function attachListeners() {
+            dateInput.onchange = (e) => state.date = e.target.value;
+            saleInput.oninput = (e) => {
+                state.sale = parseFloat(e.target.value) || 0;
+                calculate();
+            };
+            whatsappBtn.onclick = sendToWhatsApp;
+        }
+
+        window.toggleExpense = function(id) {
+            const cb = document.getElementById(`cb-${id}`);
+            const inputContainer = document.getElementById(`input-container-${id}`);
+            const itemContainer = document.getElementById(`item-container-${id}`);
+            
+            state.expenses[id].checked = cb.checked;
+            
+            if (cb.checked) {
+                inputContainer.classList.remove('hidden');
+                itemContainer.classList.add('bg-orange-50', 'border-orange-200', 'ring-1', 'ring-orange-200');
+                document.getElementById(`input-${id}`).focus();
+            } else {
+                inputContainer.classList.add('hidden');
+                itemContainer.classList.remove('bg-orange-50', 'border-orange-200', 'ring-1', 'ring-orange-200');
+                state.expenses[id].amount = 0;
+                document.getElementById(`input-${id}`).value = '';
+            }
+            calculate();
+        };
+
+        window.updateExpenseAmount = function(id, value) {
+            state.expenses[id].amount = parseFloat(value) || 0;
+            calculate();
+        };
+
+        function calculate() {
+            const totalExpense = Object.values(state.expenses).reduce((acc, exp) => acc + (exp.checked ? exp.amount : 0), 0);
+            const profit = state.sale - totalExpense;
+
+            totalSaleDisplay.innerText = state.sale.toLocaleString();
+            totalExpenseDisplay.innerText = totalExpense.toLocaleString();
+            profitDisplay.innerText = Math.abs(profit).toLocaleString();
+
+            if (profit >= 0) {
+                resultLabel.innerText = 'نفع (Profit)';
+                resultCard.classList.remove('bg-rose-600', 'border-rose-400');
+                resultCard.classList.add('bg-emerald-600', 'border-emerald-400');
+            } else {
+                resultLabel.innerText = 'نقصان (Loss)';
+                resultCard.classList.remove('bg-emerald-600', 'border-emerald-400');
+                resultCard.classList.add('bg-rose-600', 'border-rose-400');
+            }
+        }
+
+        function sendToWhatsApp() {
+            const dateObj = new Date(state.date);
+            const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+            const displayDate = dateObj.toLocaleDateString('ur-PK', options);
+
+            let expenseDetails = '';
+            let totalExpense = 0;
+            DEFAULT_EXPENSES.forEach(item => {
+                const exp = state.expenses[item.id];
+                if (exp.checked && exp.amount > 0) {
+                    expenseDetails += `${item.name}: ${exp.amount.toLocaleString()}\n`;
+                    totalExpense += exp.amount;
+                }
+            });
+
+            const profitValue = state.sale - totalExpense;
+            const resultType = profitValue >= 0 ? 'نفع' : 'نقصان';
+            
+            let reportText = '\u200F'; 
+            reportText += `*ایم نوید چسکا پوائنٹ - روزانہ رپورٹ*\n\n`;
+            reportText += `*تاریخ:* ${displayDate}\n`;
+            reportText += `-----------------------------\n`;
+            reportText += `سیل: ${state.sale.toLocaleString()}\n`;
+            reportText += `*ٹوٹل سیل: ${state.sale.toLocaleString()}*\n\n`;
+            
+            reportText += `*اخراجات*\n`;
+            reportText += expenseDetails || `کوئی خرچہ نہیں\n`;
+            reportText += `*ٹوٹل خرچہ: ${totalExpense.toLocaleString()}*\n`;
+            reportText += `-----------------------------\n`;
+            reportText += `*نتیجہ*\n`;
+            reportText += `*کل ${resultType}: ${Math.abs(profitValue).toLocaleString()}*\n`;
+            reportText += `-----------------------------\n`;
+            reportText += `_ہمیشہ نماز کی پابندی کریں_`;
+
+            const encodedText = encodeURIComponent(reportText);
+            const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedText}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
+        init();
+    </script>
+</body>
+</html>
