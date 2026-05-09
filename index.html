@@ -254,24 +254,68 @@
         async function generateReportImage() {
             const captureArea = document.getElementById('capture-area');
             
-            // Temporary styles for capture to ensure it looks perfect
-            const originalBorder = captureArea.style.border;
-            captureArea.style.backgroundColor = '#fafafa';
-            
             try {
                 const canvas = await html2canvas(captureArea, {
-                    scale: 2,
+                    scale: 3,
                     useCORS: true,
                     logging: false,
-                    backgroundColor: '#fafafa',
-                    onclone: (document) => {
-                        // Ensure inputs are not shown as editable in screenshot
-                        const inputs = document.querySelectorAll('input');
-                        inputs.forEach(input => {
-                            if (input.type === 'date' || input.type === 'number') {
-                                // Just visual tweaks for the screenshot version
+                    backgroundColor: '#ffffff',
+                    onclone: (clonedDoc) => {
+                        // 1. Process Expense Items: Only show checked ones
+                        const items = clonedDoc.querySelectorAll('.expense-item');
+                        items.forEach(item => {
+                            const id = item.id.replace('item-container-', '');
+                            const isChecked = state.expenses[id] && state.expenses[id].checked;
+                            
+                            if (!isChecked) {
+                                item.remove();
+                            } else {
+                                // Make it look like a receipt item
+                                const cb = item.querySelector('input[type="checkbox"]');
+                                if (cb) cb.remove();
+                                
+                                const inputContainer = item.querySelector(`[id^="input-container-"]`);
+                                if (inputContainer) {
+                                    inputContainer.classList.remove('hidden');
+                                    inputContainer.classList.add('block', 'w-auto');
+                                    
+                                    const input = inputContainer.querySelector('input');
+                                    if (input) {
+                                        const val = input.value || '0';
+                                        const textSpan = clonedDoc.createElement('span');
+                                        textSpan.className = 'text-xl font-bold text-slate-800 tabular-nums';
+                                        textSpan.innerText = parseFloat(val).toLocaleString();
+                                        input.parentNode.replaceChild(textSpan, input);
+                                    }
+                                }
+                                
+                                item.classList.remove('bg-orange-50', 'border-orange-200', 'ring-1', 'ring-orange-200');
+                                item.classList.add('border-b', 'border-slate-100', 'rounded-none', 'px-0');
                             }
                         });
+
+                        // 2. Hide inputs and show static values
+                        const saleInput = clonedDoc.getElementById('total-sale-input');
+                        if (saleInput) saleInput.closest('.space-y-2').remove();
+
+                        const dateInput = clonedDoc.getElementById('report-date');
+                        if (dateInput) {
+                            const dateValue = dateInput.value;
+                            const formattedDate = new Date(dateValue).toLocaleDateString('ur-PK', { 
+                                year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' 
+                            });
+                            const dateLabel = clonedDoc.createElement('div');
+                            dateLabel.className = 'text-xl font-bold text-orange-600 mt-2';
+                            dateLabel.innerText = formattedDate;
+                            dateInput.parentNode.replaceChild(dateLabel, dateInput);
+                        }
+
+                        // 3. Grid adjustment
+                        const list = clonedDoc.getElementById('expenses-list');
+                        if (list) {
+                            list.classList.remove('md:grid-cols-2');
+                            list.classList.add('grid-cols-1');
+                        }
                     }
                 });
 
@@ -284,8 +328,6 @@
                 imageModal.classList.add('flex');
             } catch (err) {
                 alert('تصویر بنانے میں غلطی ہوئی: ' + err.message);
-            } finally {
-                captureArea.style.border = originalBorder;
             }
         }
 
