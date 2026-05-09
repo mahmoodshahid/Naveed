@@ -9,7 +9,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&family=Lateef:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body {
             font-family: 'Lateef', serif;
@@ -98,30 +97,11 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="grid grid-cols-1 gap-4 mt-6">
-            <button id="generate-image-btn" class="w-full py-5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-[2rem] shadow-xl flex items-center justify-center gap-3 text-2xl font-bold hover:scale-[1.02] active:scale-[0.98] transition-all">
-                <i class="fas fa-image text-3xl"></i>
-                <span class="font-urdu pt-1">رپورٹ کی تصویر بنائیں</span>
+        <div class="grid grid-cols-1 mt-6">
+            <button id="share-btn" class="w-full py-5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-[2rem] shadow-xl flex items-center justify-center gap-3 text-2xl font-bold hover:scale-[1.02] active:scale-[0.98] transition-all">
+                <i class="fas fa-share-alt text-3xl"></i>
+                <span class="font-urdu pt-1">رپورٹ شیئر کریں</span>
             </button>
-            <button id="copy-btn" class="w-full py-4 bg-slate-200 text-slate-700 rounded-[2rem] shadow-sm flex items-center justify-center gap-3 text-xl font-bold hover:bg-slate-300 transition-all">
-                <i class="fas fa-copy"></i>
-                <span class="font-urdu">ٹیکسٹ کاپی کریں</span>
-            </button>
-        </div>
-
-        <!-- Image Preview Modal (Hidden by default) -->
-        <div id="image-modal" class="fixed inset-0 bg-black/80 z-50 hidden items-center justify-center p-4">
-            <div class="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-2xl font-bold font-urdu">رپورٹ کی تصویر</h3>
-                    <button id="close-modal" class="text-slate-400 hover:text-slate-600">
-                        <i class="fas fa-times text-2xl"></i>
-                    </button>
-                </div>
-                <p class="text-slate-500 text-center font-urdu">تصویر کو دبائے رکھیں (Long Press) اور پھر Save کر لیں۔</p>
-                <div id="image-container" class="border rounded-2xl overflow-hidden shadow-inner bg-slate-50"></div>
-                <a id="download-link" href="#" download="Report.png" class="block w-full py-4 bg-orange-500 text-white text-center rounded-2xl font-bold font-urdu text-xl">تصویر ڈاؤن لوڈ کریں</a>
-            </div>
         </div>
 
         <!-- Footer -->
@@ -164,12 +144,7 @@
         const profitDisplay = document.getElementById('display-profit');
         const resultLabel = document.getElementById('result-label');
         const resultCard = document.getElementById('result-card');
-        const generateImageBtn = document.getElementById('generate-image-btn');
-        const copyBtn = document.getElementById('copy-btn');
-        const imageModal = document.getElementById('image-modal');
-        const imageContainer = document.getElementById('image-container');
-        const closeModal = document.getElementById('close-modal');
-        const downloadLink = document.getElementById('download-link');
+        const shareBtn = document.getElementById('share-btn');
 
         // Initialize
         function init() {
@@ -199,12 +174,32 @@
                 state.sale = parseFloat(e.target.value) || 0;
                 calculate();
             };
-            generateImageBtn.onclick = generateReportImage;
-            copyBtn.onclick = copyReportText;
-            closeModal.onclick = () => imageModal.classList.add('hidden');
-            imageModal.onclick = (e) => {
-                if (e.target === imageModal) imageModal.classList.add('hidden');
-            };
+            shareBtn.onclick = shareReport;
+        }
+
+        async function shareReport() {
+            const reportText = getReportString();
+            
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'ایم نوید چسکا پوائنٹ رپورٹ',
+                        text: reportText
+                    });
+                } catch (err) {
+                    if (err.name !== 'AbortError') {
+                        fallbackToWhatsApp(reportText);
+                    }
+                }
+            } else {
+                fallbackToWhatsApp(reportText);
+            }
+        }
+
+        function fallbackToWhatsApp(text) {
+            const encodedText = encodeURIComponent(text);
+            const whatsappUrl = `https://api.whatsapp.com/send?phone=923458081903&text=${encodedText}`;
+            window.location.href = whatsappUrl;
         }
 
         window.toggleExpense = function(id) {
@@ -251,95 +246,6 @@
             }
         }
 
-        async function generateReportImage() {
-            const captureArea = document.getElementById('capture-area');
-            
-            try {
-                const canvas = await html2canvas(captureArea, {
-                    scale: 3,
-                    useCORS: true,
-                    logging: false,
-                    backgroundColor: '#ffffff',
-                    onclone: (clonedDoc) => {
-                        // 1. Process Expense Items: Only show checked ones
-                        const items = clonedDoc.querySelectorAll('.expense-item');
-                        items.forEach(item => {
-                            const id = item.id.replace('item-container-', '');
-                            const isChecked = state.expenses[id] && state.expenses[id].checked;
-                            
-                            if (!isChecked) {
-                                item.remove();
-                            } else {
-                                // Make it look like a receipt item
-                                const cb = item.querySelector('input[type="checkbox"]');
-                                if (cb) cb.remove();
-                                
-                                const inputContainer = item.querySelector(`[id^="input-container-"]`);
-                                if (inputContainer) {
-                                    inputContainer.classList.remove('hidden');
-                                    inputContainer.classList.add('block', 'w-auto');
-                                    
-                                    const input = inputContainer.querySelector('input');
-                                    if (input) {
-                                        const val = input.value || '0';
-                                        const textSpan = clonedDoc.createElement('span');
-                                        textSpan.className = 'text-xl font-bold text-slate-800 tabular-nums';
-                                        textSpan.innerText = parseFloat(val).toLocaleString();
-                                        input.parentNode.replaceChild(textSpan, input);
-                                    }
-                                }
-                                
-                                item.classList.remove('bg-orange-50', 'border-orange-200', 'ring-1', 'ring-orange-200');
-                                item.classList.add('border-b', 'border-slate-100', 'rounded-none', 'px-0');
-                            }
-                        });
-
-                        // 2. Hide inputs and show static values
-                        const saleInput = clonedDoc.getElementById('total-sale-input');
-                        if (saleInput) saleInput.closest('.space-y-2').remove();
-
-                        const dateInput = clonedDoc.getElementById('report-date');
-                        if (dateInput) {
-                            const dateValue = dateInput.value;
-                            const formattedDate = new Date(dateValue).toLocaleDateString('ur-PK', { 
-                                year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' 
-                            });
-                            const dateLabel = clonedDoc.createElement('div');
-                            dateLabel.className = 'text-xl font-bold text-orange-600 mt-2';
-                            dateLabel.innerText = formattedDate;
-                            dateInput.parentNode.replaceChild(dateLabel, dateInput);
-                        }
-
-                        // 3. Grid adjustment
-                        const list = clonedDoc.getElementById('expenses-list');
-                        if (list) {
-                            list.classList.remove('md:grid-cols-2');
-                            list.classList.add('grid-cols-1');
-                        }
-                    }
-                });
-
-                const imgData = canvas.toDataURL('image/png');
-                
-                // Show modal with image
-                imageContainer.innerHTML = `<img src="${imgData}" class="w-full h-auto" />`;
-                downloadLink.href = imgData;
-                imageModal.classList.remove('hidden');
-                imageModal.classList.add('flex');
-            } catch (err) {
-                alert('تصویر بنانے میں غلطی ہوئی: ' + err.message);
-            }
-        }
-
-        function copyReportText() {
-            const reportText = getReportString();
-            navigator.clipboard.writeText(reportText).then(() => {
-                alert('رپورٹ کاپی ہو گئی ہے!');
-            }).catch(err => {
-                alert('کاپی کرنے میں غلطی ہوئی');
-            });
-        }
-
         function getReportString() {
             const dateObj = new Date(state.date);
             const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
@@ -376,7 +282,5 @@
 
         init();
     </script>
-</body>
-</html>
 </body>
 </html>
