@@ -198,8 +198,17 @@
 
         function fallbackToWhatsApp(text) {
             const encodedText = encodeURIComponent(text);
-            const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedText}`;
-            window.location.href = whatsappUrl;
+            // Universal Link (wa.me) is the gold standard for opening WhatsApp
+            const whatsappUrl = `https://wa.me/?text=${encodedText}`;
+            
+            // Using window.open with _blank is often more successful at invoking external apps
+            // compared to location.href which might stay inside a locked WebView
+            const win = window.open(whatsappUrl, '_blank');
+            
+            // Check if window.open was blocked or failed
+            if (!win || win.closed || typeof win.closed === 'undefined') {
+                window.location.href = whatsappUrl;
+            }
         }
 
         window.toggleExpense = function(id) {
