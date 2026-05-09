@@ -248,12 +248,11 @@
 
             const encodedText = encodeURIComponent(reportText);
             
-            // Using api.whatsapp.com which is often more compatible in WebViews
-            // Explicitly including the number 923458081903
-            const whatsappUrl = `https://wa.me/send?phone=923458081903&text=${encodedText}`;
+            // Use standard wa.me format for best compatibility (923458081903)
+            const whatsappUrl = `https://wa.me/923458081903?text=${encodedText}`;
             
-            // Use window.location.href for single-page apps/WebViews to ensure the redirect is handled by the browser
-            window.location.href = whatsappUrl;
+            // Using window.open with _top or simply window.location.href for top-level navigation
+            window.top.location.href = whatsappUrl;
         }
 
         init();
