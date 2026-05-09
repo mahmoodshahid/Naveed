@@ -248,20 +248,11 @@
 
             const encodedText = encodeURIComponent(reportText);
             
-            // Use Direct WhatsApp API for better compatibility
-            let whatsappUrl = `https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${encodedText}`;
+            // Universal Link for WhatsApp (Most stable on all devices)
+            const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedText}`;
             
-            // Deep link for mobile devices to skip "Open in WhatsApp" page if possible
-            if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-                whatsappUrl = `whatsapp://send?phone=${WHATSAPP_NUMBER}&text=${encodedText}`;
-            }
-
-            try {
-                window.location.href = whatsappUrl;
-            } catch (err) {
-                // Fallback to web link if deep link fails
-                window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodedText}`, '_blank');
-            }
+            // Using window.open with _blank is more reliable than location.href for external apps
+            window.open(whatsappUrl, '_blank');
         }
 
         init();
