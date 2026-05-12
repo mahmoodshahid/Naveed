@@ -198,17 +198,22 @@
 
         function fallbackToWhatsApp(text) {
             const encodedText = encodeURIComponent(text);
-            // Universal Link (wa.me) is the gold standard for opening WhatsApp
-            const whatsappUrl = `https://wa.me/?text=${encodedText}`;
             
-            // Using window.open with _blank is often more successful at invoking external apps
-            // compared to location.href which might stay inside a locked WebView
-            const win = window.open(whatsappUrl, '_blank');
+            // Try WhatsApp URI scheme first - this is most reliable for triggering the native app
+            // especially within WebViews or APK wrappers
+            const whatsappUri = `whatsapp://send?text=${encodedText}`;
+            const whatsappUniversal = `https://wa.me/?text=${encodedText}`;
             
-            // Check if window.open was blocked or failed
-            if (!win || win.closed || typeof win.closed === 'undefined') {
-                window.location.href = whatsappUrl;
-            }
+            // Try to open the URI scheme
+            window.location.href = whatsappUri;
+            
+            // Set a timeout to fallback to universal link if URI scheme failed to open anything
+            // (Standard technique for deep linking fallbacks)
+            setTimeout(() => {
+                if (document.hasFocus()) {
+                    window.location.href = whatsappUniversal;
+                }
+            }, 500);
         }
 
         window.toggleExpense = function(id) {
